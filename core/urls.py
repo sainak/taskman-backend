@@ -19,7 +19,7 @@ urlpatterns += [
     # API base url
     path("api/", include("taskman.api_router")),
     # DRF auth token
-    path("auth-token/", obtain_auth_token),
+    path("api/auth/token", obtain_auth_token),
     # Schema
     path("api/schema", SpectacularAPIView.as_view(), name="schema"),
     path(
