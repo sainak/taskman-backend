@@ -53,7 +53,8 @@ init-tw: ## Initialize django-tailwind.
 
 init: ## Initialize project for development.
 	@echo "--> Initializing project"
-	@${MAKE} init-dev init-db init-tw
+	@${MAKE} init-dev init-db
+# @${MAKE} init-dev init-db init-tw
 
 clean: ## Clean up.
 	@echo "--> Removing venv"
@@ -72,7 +73,7 @@ reinit: clean init reinit-db ## Re-initialize project.
 update: ## Install and update dependencies.
 	@echo "--> Updating dependencies"
 	@pipenv update --dev
-	@pipenv run ./manage.py tailwind update
+# @pipenv run ./manage.py tailwind update
 
 su: ## Create superuser.
 	@echo "--> Creating superuser"
@@ -116,7 +117,6 @@ test: ## Run tests.
 	@pipenv run coverage html
 	@pipenv run coverage xml
 	@pipenv run coverage report
-
 
 lint: ## Lint code.
 	@echo "--> Formatting code"
