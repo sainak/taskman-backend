@@ -92,7 +92,9 @@ class BoardAccessViewSet(BaseApiViewSet):
     serializer_class = BoardAccessSerializer
 
     def get_queryset(self):
-        qs = super().get_queryset().filter(board__id=self.kwargs["board_pk"])
+        qs = super().get_queryset()
+        if board_pk := self.kwargs.get("board_pk"):
+            qs.filter(board=board_pk)
         if self.action == "list":
             return qs.filter(access__id=self.request.user.id)
         return qs
@@ -103,7 +105,9 @@ class StageViewSet(BaseApiViewSet):
     serializer_class = StageSerializer
 
     def get_queryset(self):
-        qs = super().get_queryset().filter(board__id=self.kwargs["board_pk"])
+        qs = super().get_queryset()
+        if board_pk := self.kwargs.get("board_pk"):
+            qs.filter(board=board_pk)
         if self.action == "list":
             return qs.filter(board__access__id=self.request.user.id)
         return qs
@@ -119,7 +123,9 @@ class TagViewSet(BaseApiViewSet):
     serializer_class = TagSerializer
 
     def get_queryset(self):
-        qs = super().get_queryset().filter(board=self.kwargs["board_pk"])
+        qs = super().get_queryset()
+        if board_pk := self.kwargs.get("board_pk"):
+            qs.filter(board__id=board_pk)
         if self.action == "list":
             return qs.filter(board__access__id=self.request.user.id)
         return qs
@@ -135,16 +141,13 @@ class TaskViewSet(BaseApiViewSet):
     serializer_class = TaskSerializer
 
     def get_queryset(self):
-        qs = (
-            super()
-            .get_queryset()
-            .filter(
-                stage__board=self.kwargs["board_pk"],
-                stage=self.kwargs["stage_pk"],
-            )
-        )
+        qs = super().get_queryset()
+        if board_pk := self.kwargs.get("board_pk"):
+            qs.filter(board=board_pk)
+        if stage_pk := self.kwargs.get("stage_pk"):
+            qs.filter(stage=stage_pk)
         if self.action == "list":
-            return qs.filter(stage__board__access__id=self.request.user.id)
+            return qs.filter(board__access__id=self.request.user.id)
         return qs
 
     def get_serializer_class(self):
