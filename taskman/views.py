@@ -12,7 +12,7 @@ from rest_framework.viewsets import GenericViewSet
 from utils.views.base import BaseModelViewSet
 from utils.views.mixins import PartialUpdateModelMixin
 
-from .models import Board, BoardAccess, Stage, Tag, Task, User
+from .models import AccessLevel, Board, BoardAccess, Stage, Tag, Task, User
 from .permissions import BoardAccessPermission, IsSelfOrReadOnly
 from .serializers import (
     BoardAccessSerializer,
@@ -71,9 +71,12 @@ class UserViewSet(
         return super().destroy(request, *args, **kwargs)
 
 
-class BoardViewSet(BaseApiViewSet):
+class BoardViewSet(BaseModelViewSet):
     queryset = Board.objects.all()
     serializer_class = BoardSerializer
+
+    def get_permissions(self):
+        return (BoardAccessPermission(AccessLevel.READ_ONLY, AccessLevel.ADMIN),)
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -87,9 +90,12 @@ class BoardViewSet(BaseApiViewSet):
         return super().get_serializer_class()
 
 
-class BoardAccessViewSet(BaseApiViewSet):
+class BoardAccessViewSet(BaseModelViewSet):
     queryset = BoardAccess.objects.all()
     serializer_class = BoardAccessSerializer
+
+    def get_permissions(self):
+        return (BoardAccessPermission(AccessLevel.READ_ONLY, AccessLevel.OWNER),)
 
     def get_queryset(self):
         qs = super().get_queryset()

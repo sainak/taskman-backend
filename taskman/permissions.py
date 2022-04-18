@@ -11,6 +11,15 @@ class IsSelfOrReadOnly(permissions.IsAuthenticated):
 
 
 class BoardAccessPermission(permissions.IsAuthenticated):
+    def __init__(
+        self,
+        read_level=AccessLevel.READ_ONLY,
+        write_level=AccessLevel.READ_WRITE,
+    ):
+        super().__init__()
+        self.read_level = read_level
+        self.write_level = write_level
+
     def has_object_permission(self, request, _, obj):
         access = obj.get_access_level(request.user.id)
 
@@ -18,7 +27,7 @@ class BoardAccessPermission(permissions.IsAuthenticated):
             return False
 
         return (
-            access <= AccessLevel.READ_ONLY
+            access <= self.read_level
             if request.method in permissions.SAFE_METHODS
-            else access <= AccessLevel.READ_WRITE
+            else access <= self.write_level
         )
