@@ -19,6 +19,7 @@ sentry-sdk = "*"
 django-anymail = {extras = ["mailgun"], version = "*"}
 django-admin-sortable = "*"
 drf-spectacular = "*"
+django-cors-headers = "*"
 
 [dev-packages]
 django-debug-toolbar = "*"

@@ -5,6 +5,7 @@ Base settings to build other settings files upon.
 from pathlib import Path
 
 import environ
+from corsheaders.defaults import default_headers
 from django.urls import reverse_lazy
 
 ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
@@ -62,6 +63,7 @@ DJANGO_APPS = [
 ]
 THIRD_PARTY_APPS = [
     "adminsortable",
+    "corsheaders",
     "rest_framework",
     "rest_framework.authtoken",
     "django_filters",
@@ -113,6 +115,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/dev/ref/settings/#middleware
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
@@ -298,3 +301,14 @@ STATICFILES_FINDERS = (
 )
 
 DEBUG_PROPAGATE_EXCEPTIONS = True
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:3000",
+# ]
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "sentry-trace",
+]
