@@ -1,16 +1,9 @@
-from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import permissions
 from rest_framework.decorators import action
-from rest_framework.mixins import (
-    CreateModelMixin,
-    DestroyModelMixin,
-    RetrieveModelMixin,
-)
-from rest_framework.viewsets import GenericViewSet
+from rest_framework.exceptions import NotFound
 
 from utils.views.base import BaseModelViewSet
-from utils.views.mixins import PartialUpdateModelMixin
 
 from .models import AccessLevel, Board, BoardAccess, Stage, Tag, Task, User
 from .permissions import BoardAccessPermission, IsSelfOrReadOnly
@@ -33,16 +26,11 @@ class BaseApiViewSet(BaseModelViewSet):
 
 
 @extend_schema_view(
-    partial_update=extend_schema(exclude=True),
     destroy=extend_schema(exclude=True),
+    list=extend_schema(exclude=True),
+    partial_update=extend_schema(exclude=True),
 )
-class UserViewSet(
-    RetrieveModelMixin,
-    CreateModelMixin,
-    DestroyModelMixin,
-    PartialUpdateModelMixin,
-    GenericViewSet,
-):
+class UserViewSet(BaseModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
@@ -57,6 +45,9 @@ class UserViewSet(
             if self.kwargs.get(self.lookup_field)
             else self.request.user
         )
+
+    def list(self, request, *args, **kwargs):
+        raise NotFound
 
     @action(detail=False)
     def me(self, *args, **kwargs):
