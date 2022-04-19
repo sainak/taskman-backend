@@ -264,6 +264,7 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.BasicAuthentication",
     ],
     "DEFAULT_SCHEMA_CLASS": "utils.schema.AutoSchema",
+    "EXCEPTION_HANDLER": "utils.exceptions.exception_handler",
 }
 
 SPECTACULAR_SETTINGS = {
