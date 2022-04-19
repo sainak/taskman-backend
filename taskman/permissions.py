@@ -21,7 +21,13 @@ class BoardAccessPermission(permissions.IsAuthenticated):
         self.write_level = write_level
 
     def has_object_permission(self, request, _, obj):
-        access = obj.get_access_level(request.user.id)
+
+        board = obj.get_board()
+
+        if request.method in permissions.SAFE_METHODS and board.public:
+            return True
+
+        access = board.get_access_level(request.user.id)
 
         if access is None:
             return False

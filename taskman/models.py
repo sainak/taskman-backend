@@ -13,6 +13,7 @@ class AccessLevel(models.IntegerChoices):
     ADMIN = 100
     READ_WRITE = 1000
     READ_ONLY = 2000
+    NONE = -1
 
 
 class User(AbstractUser):
@@ -30,6 +31,7 @@ class Board(BaseModel):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     archived = models.BooleanField(default=False, db_index=True)
+    public = models.BooleanField(default=False, db_index=True)
 
     access = models.ManyToManyField(
         User,
@@ -48,12 +50,15 @@ class Board(BaseModel):
             return None
         return access.level
 
+    def get_board(self):
+        return self
+
 
 class BoardAccess(models.Model):
     board = models.ForeignKey(Board, on_delete=models.CASCADE, db_index=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
-    level = models.PositiveIntegerField(
+    level = models.SmallIntegerField(
         choices=AccessLevel.choices, default=AccessLevel.READ_WRITE
     )
 
@@ -90,6 +95,9 @@ class Tag(BaseModel):
             return None
         return access.level
 
+    def get_board(self):
+        return self.board
+
     class Meta:
         constraints = [
             models.UniqueConstraint(
@@ -120,6 +128,9 @@ class Stage(SortableMixin, BaseModel):
             return None
         return access.level
 
+    def get_board(self):
+        return self.board
+
     class Meta:
         ordering = ["priority"]
 
@@ -140,9 +151,12 @@ class Task(SortableMixin, BaseModel):
 
     def get_access_level(self, user_id):
         try:
-            access = self.stage.board.access.through.objects.get(
+            access = self.board.access.through.objects.get(
                 board_id=self.id, user_id=user_id
             )
         except BoardAccess.DoesNotExist:
             return None
         return access.level
+
+    def get_board(self):
+        return self.board

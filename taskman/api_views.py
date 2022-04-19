@@ -1,3 +1,4 @@
+from django.db.models import Q
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import permissions
 from rest_framework.decorators import action
@@ -72,7 +73,7 @@ class BoardViewSet(BaseModelViewSet):
     def get_queryset(self):
         qs = super().get_queryset()
         if self.action == "list":
-            return qs.filter(access__id=self.request.user.id)
+            qs = qs.filter(Q(access__id=self.request.user.id) | Q(public=True))
         return qs
 
     def get_serializer_class(self):
@@ -93,7 +94,7 @@ class BoardAccessViewSet(BaseModelViewSet):
         if board_pk := self.kwargs.get("board_pk"):
             qs.filter(board=board_pk)
         if self.action == "list":
-            return qs.filter(access__id=self.request.user.id)
+            qs = qs.filter(access__id=self.request.user.id)
         return qs
 
 
@@ -106,7 +107,9 @@ class StageViewSet(BaseApiViewSet):
         if board_pk := self.kwargs.get("board_pk"):
             qs.filter(board=board_pk)
         if self.action == "list":
-            return qs.filter(board__access__id=self.request.user.id)
+            qs = qs.filter(
+                Q(board__access__id=self.request.user.id) | Q(board__public=True)
+            )
         return qs
 
     def get_serializer_class(self):
@@ -124,7 +127,9 @@ class TagViewSet(BaseApiViewSet):
         if board_pk := self.kwargs.get("board_pk"):
             qs.filter(board__id=board_pk)
         if self.action == "list":
-            return qs.filter(board__access__id=self.request.user.id)
+            qs = qs.filter(
+                Q(board__access__id=self.request.user.id) | Q(board__public=True)
+            )
         return qs
 
     def get_serializer_class(self):
@@ -144,7 +149,9 @@ class TaskViewSet(BaseApiViewSet):
         if stage_pk := self.kwargs.get("stage_pk"):
             qs.filter(stage=stage_pk)
         if self.action == "list":
-            return qs.filter(board__access__id=self.request.user.id)
+            qs = qs.filter(
+                Q(board__access__id=self.request.user.id) | Q(board__public=True)
+            )
         return qs
 
     def get_serializer_class(self):

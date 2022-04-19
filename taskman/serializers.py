@@ -117,9 +117,12 @@ class BoardSerializer(serializers.ModelSerializer):
     # stages = StageSerializer(many=True, read_only=True)
 
     def get_access_level(self, obj) -> int:
-        return BoardAccess.objects.get(
-            user=self.context["request"].user, board=obj
-        ).level
+        try:
+            return BoardAccess.objects.get(
+                user=self.context["request"].user, board=obj
+            ).level
+        except BoardAccess.DoesNotExist:
+            return AccessLevel.NONE
 
     def create(self, validated_data):
         board = super().create(validated_data)
