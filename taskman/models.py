@@ -1,9 +1,11 @@
 from adminsortable.fields import SortableForeignKey
 from adminsortable.models import SortableMixin
 from django.contrib.auth.models import AbstractUser
-from django.db import models, transaction
+from django.db import models
 
 from utils.models.base import BaseModel
+
+from .validators import avatar_validator
 
 
 class AccessLevel(models.IntegerChoices):
@@ -14,7 +16,14 @@ class AccessLevel(models.IntegerChoices):
 
 
 class User(AbstractUser):
-    pass
+    avatar = models.CharField(
+        max_length=2048, blank=True, null=True, validators=[avatar_validator]
+    )
+
+    def save(self, *args, **kwargs):
+        if not self.avatar:
+            self.avatar = f"https://avatars.dicebear.com/api/identicon/{self.email}.svg"
+        super().save(*args, **kwargs)
 
 
 class Board(BaseModel):
