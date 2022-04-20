@@ -6,10 +6,11 @@ from rest_framework.mixins import (
 )
 from rest_framework.viewsets import GenericViewSet
 
-from .mixins import PartialUpdateModelMixin
+from .mixins import GetSerializerClassMixin, PartialUpdateModelMixin
 
 
 class BaseModelViewSet(
+    GetSerializerClassMixin,
     CreateModelMixin,
     DestroyModelMixin,
     ListModelMixin,

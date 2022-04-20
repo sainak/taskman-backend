@@ -66,6 +66,9 @@ class UserViewSet(BaseModelViewSet):
 class BoardViewSet(BaseModelViewSet):
     queryset = Board.objects.all()
     serializer_class = BoardSerializer
+    serializer_action_classes = {
+        "list": BoardListSerializer,
+    }
 
     def get_permissions(self):
         return (BoardAccessPermission(AccessLevel.READ_ONLY, AccessLevel.ADMIN),)
@@ -75,11 +78,6 @@ class BoardViewSet(BaseModelViewSet):
         if self.action == "list":
             qs = qs.filter(Q(access__id=self.request.user.id) | Q(public=True))
         return qs
-
-    def get_serializer_class(self):
-        if self.action == "list":
-            return BoardListSerializer
-        return super().get_serializer_class()
 
 
 class BoardAccessViewSet(BaseModelViewSet):
@@ -101,6 +99,9 @@ class BoardAccessViewSet(BaseModelViewSet):
 class StageViewSet(BaseApiViewSet):
     queryset = Stage.objects.all()
     serializer_class = StageSerializer
+    serializer_action_classes = {
+        "list": StageListSerializer,
+    }
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -112,15 +113,13 @@ class StageViewSet(BaseApiViewSet):
             )
         return qs
 
-    def get_serializer_class(self):
-        if self.action == "list":
-            return StageListSerializer
-        return super().get_serializer_class()
-
 
 class TagViewSet(BaseApiViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    serializer_action_classes = {
+        "list": TagListSerializer,
+    }
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -132,15 +131,13 @@ class TagViewSet(BaseApiViewSet):
             )
         return qs
 
-    def get_serializer_class(self):
-        if self.action == "list":
-            return TagListSerializer
-        return super().get_serializer_class()
-
 
 class TaskViewSet(BaseApiViewSet):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
+    serializer_action_classes = {
+        "list": TaskListSerializer,
+    }
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -153,8 +150,3 @@ class TaskViewSet(BaseApiViewSet):
                 Q(board__access__id=self.request.user.id) | Q(board__public=True)
             )
         return qs
-
-    def get_serializer_class(self):
-        if self.action == "list":
-            return TaskListSerializer
-        return super().get_serializer_class()
