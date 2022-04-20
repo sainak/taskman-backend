@@ -3,12 +3,13 @@ from rest_framework import serializers
 from .models import AccessLevel, Board, BoardAccess, Stage, Tag, Task, User
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
             "id",
             "username",
+            "avatar",
             "email",
             "password",
             "first_name",
@@ -28,27 +29,46 @@ class UserSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
-class UserListSerializer(serializers.ModelSerializer):
+class UserSerializer(UserDetailSerializer):
     class Meta:
         model = User
-        fields = ("id", "username", "email", "first_name", "last_name", "last_login")
+        fields = (
+            "id",
+            "username",
+            "email",
+            "avatar",
+            "first_name",
+            "last_name",
+            "last_login",
+        )
 
 
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = ("id", "name", "color", "description", "modified_at", "created_at")
+        fields = (
+            "id",
+            "name",
+            "color",
+            "description",
+            "modified_at",
+            "created_at",
+        )
 
 
-class TagListSerializer(serializers.ModelSerializer):
+class TagSerializer(TagSerializer):
     class Meta:
         model = Tag
-        fields = ("id", "name", "color")
+        fields = (
+            "id",
+            "name",
+            "color",
+        )
 
 
-class TaskSerializer(serializers.ModelSerializer):
+class TaskDetailSerializer(serializers.ModelSerializer):
 
-    tags = TagListSerializer(many=True, required=False)
+    tags = TagSerializer(many=True, required=False)
 
     class Meta:
         model = Task
@@ -66,16 +86,19 @@ class TaskSerializer(serializers.ModelSerializer):
         )
 
 
-class TaskListSerializer(serializers.ModelSerializer):
-
-    tags = TagListSerializer(many=True)
-
+class TaskSerializer(TaskDetailSerializer):
     class Meta:
         model = Task
-        fields = ("id", "name", "description", "tags", "priority")
+        fields = (
+            "id",
+            "name",
+            "description",
+            "tags",
+            "priority",
+        )
 
 
-class StageSerializer(serializers.ModelSerializer):
+class StageDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Stage
         fields = (
@@ -90,14 +113,18 @@ class StageSerializer(serializers.ModelSerializer):
         )
 
 
-class StageListSerializer(serializers.ModelSerializer):
+class StageSerializer(StageDetailSerializer):
     class Meta:
         model = Stage
-        fields = ("id", "name", "priority")
+        fields = (
+            "id",
+            "name",
+            "priority",
+        )
 
 
-class BoardAccessSerializer(serializers.ModelSerializer):
-    user = UserListSerializer()
+class BoardDetailAccessSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
 
     class Meta:
         model = BoardAccess
@@ -111,7 +138,7 @@ class BoardAccessSerializer(serializers.ModelSerializer):
         )
 
 
-class BoardSerializer(serializers.ModelSerializer):
+class BoardDetailSerializer(serializers.ModelSerializer):
 
     access_level = serializers.SerializerMethodField()
     # stages = StageSerializer(many=True, read_only=True)
@@ -148,15 +175,7 @@ class BoardSerializer(serializers.ModelSerializer):
         )
 
 
-class BoardListSerializer(serializers.ModelSerializer):
-
-    access_level = serializers.SerializerMethodField()
-
-    def get_access_level(self, obj) -> int:
-        return BoardAccess.objects.get(
-            user=self.context["request"].user, board=obj
-        ).level
-
+class BoardSerializer(BoardDetailSerializer):
     class Meta:
         model = Board
         fields = (

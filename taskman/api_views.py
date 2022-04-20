@@ -9,16 +9,16 @@ from utils.views.base import BaseModelViewSet
 from .models import AccessLevel, Board, BoardAccess, Stage, Tag, Task, User
 from .permissions import BoardAccessPermission, IsSelfOrReadOnly
 from .serializers import (
-    BoardAccessSerializer,
-    BoardListSerializer,
+    BoardDetailAccessSerializer,
     BoardSerializer,
-    StageListSerializer,
+    BoardDetailSerializer,
     StageSerializer,
-    TagListSerializer,
+    StageDetailSerializer,
     TagSerializer,
-    TaskListSerializer,
+    TagSerializer,
     TaskSerializer,
-    UserSerializer,
+    TaskDetailSerializer,
+    UserDetailSerializer,
 )
 
 
@@ -33,7 +33,7 @@ class BaseApiViewSet(BaseModelViewSet):
 )
 class UserViewSet(BaseModelViewSet):
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = UserDetailSerializer
 
     def get_permissions(self):
         if self.action == "create":
@@ -65,9 +65,9 @@ class UserViewSet(BaseModelViewSet):
 
 class BoardViewSet(BaseModelViewSet):
     queryset = Board.objects.all()
-    serializer_class = BoardSerializer
+    serializer_class = BoardDetailSerializer
     serializer_action_classes = {
-        "list": BoardListSerializer,
+        "list": BoardSerializer,
     }
 
     def get_permissions(self):
@@ -82,7 +82,7 @@ class BoardViewSet(BaseModelViewSet):
 
 class BoardAccessViewSet(BaseModelViewSet):
     queryset = BoardAccess.objects.all()
-    serializer_class = BoardAccessSerializer
+    serializer_class = BoardDetailAccessSerializer
 
     def get_permissions(self):
         return (BoardAccessPermission(AccessLevel.READ_ONLY, AccessLevel.OWNER),)
@@ -98,9 +98,9 @@ class BoardAccessViewSet(BaseModelViewSet):
 
 class StageViewSet(BaseApiViewSet):
     queryset = Stage.objects.all()
-    serializer_class = StageSerializer
+    serializer_class = StageDetailSerializer
     serializer_action_classes = {
-        "list": StageListSerializer,
+        "list": StageSerializer,
     }
 
     def get_queryset(self):
@@ -118,7 +118,7 @@ class TagViewSet(BaseApiViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     serializer_action_classes = {
-        "list": TagListSerializer,
+        "list": TagSerializer,
     }
 
     def get_queryset(self):
@@ -134,9 +134,9 @@ class TagViewSet(BaseApiViewSet):
 
 class TaskViewSet(BaseApiViewSet):
     queryset = Task.objects.all()
-    serializer_class = TaskSerializer
+    serializer_class = TaskDetailSerializer
     serializer_action_classes = {
-        "list": TaskListSerializer,
+        "list": TaskSerializer,
     }
 
     def get_queryset(self):
