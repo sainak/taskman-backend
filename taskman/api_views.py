@@ -1,29 +1,76 @@
 from django.db.models import Q
-from drf_spectacular.utils import extend_schema, extend_schema_view
-from rest_framework import permissions
+from drf_spectacular.utils import extend_schema, extend_schema_view, inline_serializer
+from rest_framework import permissions, serializers, status
+from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, ParseError
+from rest_framework.request import Request
+from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet
 
 from utils.views.base import BaseModelViewSet
 
 from .models import AccessLevel, Board, BoardAccess, Stage, Tag, Task, User
 from .permissions import BoardAccessPermission, IsSelfOrReadOnly
 from .serializers import (
+    AuthSerializer,
     BoardDetailAccessSerializer,
-    BoardSerializer,
     BoardDetailSerializer,
-    StageSerializer,
+    BoardSerializer,
     StageDetailSerializer,
+    StageSerializer,
     TagSerializer,
-    TagSerializer,
-    TaskSerializer,
     TaskDetailSerializer,
+    TaskSerializer,
     UserDetailSerializer,
 )
 
 
 class BaseApiViewSet(BaseModelViewSet):
     permission_classes = (BoardAccessPermission,)
+
+
+class AuthViewSet(GenericViewSet):
+    def get_permissions(self):
+        if self.action == "login":
+            return (permissions.AllowAny(),)
+        return (permissions.IsAuthenticated(),)
+
+    def get_serializer_class(self):
+        if self.action == "login":
+            return AuthSerializer
+        return super().get_serializer_class()
+
+    @extend_schema(
+        tags=("auth",),
+        operation_id="api-login",
+        responses={
+            200: inline_serializer(
+                "TokenSerializer",
+                {
+                    "token": serializers.CharField(),
+                },
+            ),
+        },
+    )
+    @action(detail=False, methods=["post"])
+    def login(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data["user"]
+        token, _ = Token.objects.get_or_create(user=user)
+        return Response({"token": token.key})
+
+    @extend_schema(
+        tags=("auth",),
+        operation_id="api-logout",
+    )
+    @action(detail=False, methods=["delete"])
+    def logout(self, request: Request):
+        if auth_token := request.auth:
+            Token.objects.filter(key=auth_token).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        raise ParseError("No auth token provided")
 
 
 @extend_schema_view(

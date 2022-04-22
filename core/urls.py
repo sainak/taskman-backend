@@ -9,7 +9,6 @@ from drf_spectacular.views import (
     SpectacularRedocView,
     SpectacularSwaggerView,
 )
-from rest_framework.authtoken.views import obtain_auth_token
 
 urlpatterns = [
     path(settings.ADMIN_URL, admin.site.urls),
@@ -19,8 +18,6 @@ urlpatterns = [
 urlpatterns += [
     # API base url
     path("api/", include("taskman.api_router")),
-    # DRF auth token
-    path("api/auth/token", obtain_auth_token),
     # Schema
     path("api/schema", SpectacularAPIView.as_view(), name="schema"),
     path(

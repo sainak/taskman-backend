@@ -2,6 +2,7 @@ from django.conf import settings
 from rest_framework_nested import routers
 
 from .api_views import (
+    AuthViewSet,
     BoardAccessViewSet,
     BoardViewSet,
     StageViewSet,
@@ -18,6 +19,7 @@ if settings.DEBUG:
     router = routers.DefaultRouter(trailing_slash=False)
     NestedRouter = routers.NestedDefaultRouter
 
+router.register(r"auth", AuthViewSet, basename="auth")
 router.register(r"users", UserViewSet)
 router.register(r"boards", BoardViewSet)
 router.register(r"tasks", TaskViewSet)

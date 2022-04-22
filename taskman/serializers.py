@@ -1,6 +1,11 @@
 from rest_framework import serializers
+from rest_framework.authtoken.serializers import AuthTokenSerializer
 
 from .models import AccessLevel, Board, BoardAccess, Stage, Tag, Task, User
+
+
+class AuthSerializer(AuthTokenSerializer):
+    token = None
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
