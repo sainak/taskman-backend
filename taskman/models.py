@@ -160,3 +160,6 @@ class Task(SortableMixin, BaseModel):
 
     def get_board(self):
         return self.board
+
+    class Meta:
+        ordering = ["priority"]

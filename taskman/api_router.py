@@ -5,6 +5,7 @@ from .api_views import (
     AuthViewSet,
     BoardAccessViewSet,
     BoardViewSet,
+    HomeViewSet,
     StageViewSet,
     TagViewSet,
     TaskViewSet,
@@ -23,6 +24,7 @@ router.register(r"auth", AuthViewSet, basename="auth")
 router.register(r"users", UserViewSet)
 router.register(r"boards", BoardViewSet)
 router.register(r"tasks", TaskViewSet)
+router.register(r"home", HomeViewSet, basename="home")
 
 boards_router = NestedRouter(router, r"boards", lookup="board")
 boards_router.register(r"access", BoardAccessViewSet)

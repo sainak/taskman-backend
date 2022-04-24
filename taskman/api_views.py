@@ -1,4 +1,4 @@
-from django.db.models import Q
+from django.db.models import Count, Q
 from drf_spectacular.utils import extend_schema, extend_schema_view, inline_serializer
 from rest_framework import permissions, serializers, status
 from rest_framework.authtoken.models import Token
@@ -10,6 +10,7 @@ from rest_framework.viewsets import GenericViewSet
 
 from utils.views.base import BaseModelViewSet
 
+from .filters import TaskFilters
 from .models import AccessLevel, Board, BoardAccess, Stage, Tag, Task, User
 from .permissions import BoardAccessPermission, IsSelfOrReadOnly
 from .serializers import (
@@ -17,8 +18,10 @@ from .serializers import (
     BoardDetailAccessSerializer,
     BoardDetailSerializer,
     BoardSerializer,
+    HomeDetailSerializer,
     StageDetailSerializer,
     StageSerializer,
+    TagDetailSerializer,
     TagSerializer,
     TaskDetailSerializer,
     TaskSerializer,
@@ -137,7 +140,7 @@ class BoardAccessViewSet(BaseModelViewSet):
     def get_queryset(self):
         qs = super().get_queryset()
         if board_pk := self.kwargs.get("board_pk"):
-            qs.filter(board=board_pk)
+            qs = qs.filter(board=board_pk)
         if self.action == "list":
             qs = qs.filter(access__id=self.request.user.id)
         return qs
@@ -153,17 +156,15 @@ class StageViewSet(BaseApiViewSet):
     def get_queryset(self):
         qs = super().get_queryset()
         if board_pk := self.kwargs.get("board_pk"):
-            qs.filter(board=board_pk)
+            qs = qs.filter(board=board_pk)
         if self.action == "list":
-            qs = qs.filter(
-                Q(board__access__id=self.request.user.id) | Q(board__public=True)
-            )
+            qs = qs.filter(board__access__id=self.request.user.id)
         return qs
 
 
 class TagViewSet(BaseApiViewSet):
     queryset = Tag.objects.all()
-    serializer_class = TagSerializer
+    serializer_class = TagDetailSerializer
     serializer_action_classes = {
         "list": TagSerializer,
     }
@@ -185,15 +186,40 @@ class TaskViewSet(BaseApiViewSet):
     serializer_action_classes = {
         "list": TaskSerializer,
     }
+    filterset_class = TaskFilters
 
     def get_queryset(self):
         qs = super().get_queryset()
         if board_pk := self.kwargs.get("board_pk"):
-            qs.filter(board=board_pk)
+            qs = qs.filter(board=board_pk)
         if stage_pk := self.kwargs.get("stage_pk"):
-            qs.filter(stage=stage_pk)
+            qs = qs.filter(stage=stage_pk)
         if self.action == "list":
             qs = qs.filter(
                 Q(board__access__id=self.request.user.id) | Q(board__public=True)
             )
         return qs
+
+
+class HomeViewSet(GenericViewSet):
+    serializer_class = HomeDetailSerializer
+
+    @action(detail=False, methods=["get"])
+    def summary(self, request, *args, **kwargs):
+        tasks = (
+            Task.objects.filter(board__access__id=self.request.user.id)
+            .filter(stage__name__in=["To Do", "In Progress", "Done"])
+            .order_by("stage")
+            .values("stage__name")
+            .annotate(count=Count("stage__name"))
+        )
+        done = list(filter(lambda x: x["stage__name"] == "Done", tasks))
+        in_progress = list(filter(lambda x: x["stage__name"] == "In Progress", tasks))
+        to_do = list(filter(lambda x: x["stage__name"] == "To Do", tasks))
+        return Response(
+            {
+                "done": done[0]["count"] if done else 0,
+                "in_progress": in_progress[0]["count"] if in_progress else 0,
+                "to_do": to_do[0]["count"] if to_do else 0,
+            }
+        )

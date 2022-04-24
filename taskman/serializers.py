@@ -48,7 +48,7 @@ class UserSerializer(UserDetailSerializer):
         )
 
 
-class TagSerializer(serializers.ModelSerializer):
+class TagDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = (
@@ -61,7 +61,7 @@ class TagSerializer(serializers.ModelSerializer):
         )
 
 
-class TagSerializer(TagSerializer):
+class TagSerializer(TagDetailSerializer):
     class Meta:
         model = Tag
         fields = (
@@ -86,6 +86,7 @@ class TaskDetailSerializer(serializers.ModelSerializer):
             "archived",
             "tags",
             "stage",
+            "board",
             "modified_at",
             "created_at",
         )
@@ -125,6 +126,7 @@ class StageSerializer(StageDetailSerializer):
             "id",
             "name",
             "priority",
+            "board",
         )
 
 
@@ -164,6 +166,14 @@ class BoardDetailSerializer(serializers.ModelSerializer):
             board=board,
             level=AccessLevel.OWNER,
         )
+        # create default stages
+        Stage.objects.bulk_create(
+            [
+                Stage(name="To Do", board=board),
+                Stage(name="In Progress", board=board),
+                Stage(name="Done", board=board),
+            ]
+        )
         return board
 
     class Meta:
@@ -192,3 +202,9 @@ class BoardSerializer(BoardDetailSerializer):
             "created_at",
             "access_level",
         )
+
+
+class HomeDetailSerializer(serializers.Serializer):
+    done = serializers.IntegerField()
+    in_progress = serializers.IntegerField()
+    to_do = serializers.IntegerField()
