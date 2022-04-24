@@ -21,6 +21,8 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
   && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
   && rm -rf /var/lib/apt/lists/*
 
+RUN pip install pipenv
+
 WORKDIR ${APP_HOME}
 
 RUN addgroup --system web && adduser --system --ingroup web web
