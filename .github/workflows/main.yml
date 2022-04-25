@@ -53,6 +53,7 @@ jobs:
         name: Deploy to dokku
         uses: dokku/github-action@master
         with:
+          branch: main
           git_push_flags: "--force"
           git_remote_url: ${{ secrets.DOKKU_APP_REMOTE }} #ssh://dokku@dokku.me:22/appname
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
