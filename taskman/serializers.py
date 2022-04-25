@@ -152,14 +152,7 @@ class BoardDetailAccessSerializer(serializers.ModelSerializer):
 
 class BoardDetailSerializer(serializers.ModelSerializer):
 
-    # stages = StageSerializer(many=True, required=False, read_only=True)
-
     access_level = serializers.SerializerMethodField()
-
-    stages = serializers.SerializerMethodField()
-
-    def get_stages(self, board):
-        return {stage.id: StageSerializer(stage).data for stage in board.stages.all()}
 
     def get_access_level(self, obj) -> int:
         try:
@@ -186,6 +179,26 @@ class BoardDetailSerializer(serializers.ModelSerializer):
             ]
         )
         return board
+
+    class Meta:
+        model = Board
+        fields = (
+            "id",
+            "name",
+            "description",
+            "archived",
+            "modified_at",
+            "created_at",
+            "access_level",
+        )
+
+
+class FullBoardSerializer(BoardDetailSerializer):
+    stages = serializers.SerializerMethodField()
+
+    # TODO: fix schema
+    def get_stages(self, board):
+        return {stage.id: StageSerializer(stage).data for stage in board.stages.all()}
 
     class Meta:
         model = Board

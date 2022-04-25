@@ -18,6 +18,7 @@ from .serializers import (
     BoardDetailAccessSerializer,
     BoardDetailSerializer,
     BoardSerializer,
+    FullBoardSerializer,
     HomeDetailSerializer,
     StageDetailSerializer,
     StageSerializer,
@@ -117,6 +118,7 @@ class BoardViewSet(BaseModelViewSet):
     queryset = Board.objects.all()
     serializer_class = BoardDetailSerializer
     serializer_action_classes = {
+        "retrieve": FullBoardSerializer,
         "list": BoardSerializer,
     }
 
