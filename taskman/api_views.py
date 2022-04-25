@@ -127,6 +127,12 @@ class BoardViewSet(BaseModelViewSet):
         qs = super().get_queryset()
         if self.action == "list":
             qs = qs.filter(Q(access__id=self.request.user.id) | Q(public=True))
+        elif self.action == "retrieve":
+            qs = qs.prefetch_related(
+                "stages",
+                "stages__tasks",
+                "stages__tasks__tags",
+            )
         return qs
 
 
@@ -159,6 +165,11 @@ class StageViewSet(BaseApiViewSet):
             qs = qs.filter(board=board_pk)
         if self.action == "list":
             qs = qs.filter(board__access__id=self.request.user.id)
+        elif self.action == "retrieve":
+            qs = qs.prefetch_related(
+                "tasks",
+                "tasks__tags",
+            )
         return qs
 
 
@@ -197,6 +208,10 @@ class TaskViewSet(BaseApiViewSet):
         if self.action == "list":
             qs = qs.filter(
                 Q(board__access__id=self.request.user.id) | Q(board__public=True)
+            )
+        elif self.action == "retrieve":
+            qs = qs.prefetch_related(
+                "tags",
             )
         return qs
 

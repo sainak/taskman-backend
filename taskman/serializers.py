@@ -1,3 +1,5 @@
+from asyncore import read
+
 from rest_framework import serializers
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 
@@ -120,13 +122,16 @@ class StageDetailSerializer(serializers.ModelSerializer):
 
 
 class StageSerializer(StageDetailSerializer):
+
+    tasks = TaskSerializer(many=True, required=False, read_only=True)
+
     class Meta:
         model = Stage
         fields = (
             "id",
             "name",
             "priority",
-            "board",
+            "tasks",
         )
 
 
@@ -147,8 +152,9 @@ class BoardDetailAccessSerializer(serializers.ModelSerializer):
 
 class BoardDetailSerializer(serializers.ModelSerializer):
 
+    stages = StageSerializer(many=True, required=False, read_only=True)
+
     access_level = serializers.SerializerMethodField()
-    # stages = StageSerializer(many=True, read_only=True)
 
     def get_access_level(self, obj) -> int:
         try:
@@ -186,7 +192,7 @@ class BoardDetailSerializer(serializers.ModelSerializer):
             "modified_at",
             "created_at",
             "access_level",
-            # "stages",
+            "stages",
         )
 
 
